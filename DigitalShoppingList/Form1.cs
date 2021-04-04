@@ -28,51 +28,90 @@ namespace DigitalShoppingList
             foreach (var i in items)
             {
                 listBox1.Items.Add(i.GetInfo());
-                totalPrice += i.Price;
+                totalPrice += i.Price * i.Quantity;
 
             }
             lblTotalProductPrice.Text = totalPrice.ToString();
         }
+       
+        
 
         private void btnAddProduct_Click(object sender, EventArgs e)
         {
+            bool productAlreadyExists = false;
             string productName = tbProductName.Text;
             decimal price = nudPrice.Value;
-            Item item = new Item(productName, price);
-            items.Add(item);
-            RefreshProductList();
-            decimal maxValue = item.Price;
-            decimal[] NUmberMaxArray = new[] { maxValue};
-            
-            foreach(var i in NUmberMaxArray)
+            foreach (var i in items)
             {
-                if (i > maxValue)
+                if(i.ProductName==productName)
                 {
-                    maxValue = i;
+                    i.Quantity++;
+                    productAlreadyExists = true;
+
+                    
+                }
+                
+            }
+            if (!productAlreadyExists)
+            {
+                Item item = new Item(productName, price);
+                items.Add(item);
+              
+            }
+            RefreshProductList();
+            CalculateMinMaxValues();
+        }
+
+        private void CalculateMinMaxValues()
+        {
+            // banana hleb mleko jaja
+            string itemWhereMax = "";
+            string itemWhereMin = "";
+            decimal maxValue = -1;
+
+
+            foreach (var i in items)
+            {
+                if (i.Price > maxValue )
+                {
+                    maxValue = i.Price;
+                    itemWhereMax = i.ProductName;
+                }
+                else if(i.Price== maxValue && !itemWhereMax.Contains(i.ProductName))
+                {
+                    itemWhereMax = i.ProductName +", "+ itemWhereMax;
                 }
             }
-            lblMaxValue.Text = maxValue.ToString();
+            lblMaxValue.Text = maxValue.ToString() + " - " + itemWhereMax;
 
             decimal minValue = Int32.MaxValue;
-            decimal[] NumberMinArray = new[] { minValue};
 
-            foreach (var i in NumberMinArray)
+
+            foreach (var i in items)
             {
-                if (i < minValue)
+                if (i.Price < minValue)
                 {
-                    minValue=i;
+                    minValue = i.Price;
+                    itemWhereMin = i.ProductName;
+                }
+                else if (i.Price == minValue && !itemWhereMin.Contains(i.ProductName))
+                {
+                    itemWhereMin = i.ProductName + ", " + itemWhereMin;
                 }
             }
 
 
-            lblMinValue.Text = minValue.ToString();
+            lblMinValue.Text = minValue.ToString() + " - "+itemWhereMin;
         }
+
 
         private void btnRemoveProduct_Click(object sender, EventArgs e)
         {
             int si = listBox1.SelectedIndex;
             items.RemoveAt(si);
             RefreshProductList();
+            CalculateMinMaxValues();
+
 
         }
     }
